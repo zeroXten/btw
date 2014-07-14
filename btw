@@ -1,0 +1,79 @@
+#!/usr/bin/env ruby
+
+require 'socket'
+require 'chronic'
+require 'pp'
+require 'multi_json'
+
+config = {
+  :debug => false,
+  :service => 'btw-change-control',
+  :host => 'localhost',
+  :port => '5600',
+  :user => 'nobody'
+}
+
+config_file = File.expand_path('~/.btw.conf')
+if File.exist?(config_file)
+  config.merge!(MultiJson.load(File.read(config_file), :symbolize_names => true))
+end
+
+# The basics
+input = ARGV.join(" ")
+output = { "message" => "#{input}", "user" => config[:user], "service" => config[:service] }
+
+# Key values
+input.scan(/([a-zA-Z]+)\:([^\: ]+)/).each do |(k,v)|
+  output[k] = v
+  input.gsub!("#{k}:#{v}","")
+end
+
+# Time hacks
+input.gsub!(/an hour/, 'one hour')
+input.gsub!(/a minute/, 'one minute')
+input.gsub!(/ on /, ' ')
+input.gsub!(/test/, '')
+
+timestamp = nil
+if m = /\/(?<timestamp>.+)\//.match(input) and t = Chronic.parse(m[1])
+  timestamp = t
+end
+
+unless timestamp
+  words = input.split(" ")
+  i = 0
+  while i < words.size do
+    puts words[0..i].join(" ") if config[:debug]
+    t = Chronic.parse(words[0..i].join(" "), :endian_precedence => [:little, :middle])
+    puts "timestamp '#{timestamp}' found '#{t}'" if config[:debug]
+    if timestamp and t.nil?
+      break
+    elsif t
+      timestamp = t
+    end
+    i += 1
+  end
+end
+
+unless timestamp
+  timestamp = Time.now
+end
+
+output['timestamp'] = timestamp
+
+print "Going to send the following data:\n\n"
+pp output
+print "\nSend this? [yes] "
+answer = STDIN.gets.chomp
+
+case answer.downcase
+when 'yes','y', ''
+  sock = TCPSocket.new(config[:host], config[:port])
+  if sock.send(MultiJson.dump(output), 0)
+    puts 'Sent'
+  else
+    puts 'Could not send'
+  end
+else
+  puts 'Not sent'
+end
