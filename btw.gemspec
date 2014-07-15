@@ -10,4 +10,5 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/zeroXten/btw'
   s.license       = 'MIT'
   s.add_runtime_dependency 'chronic', '~> 0.10'
+  s.add_runtime_dependency 'multi_json', '~> 1.10'
 end

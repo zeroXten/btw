@@ -25,7 +25,7 @@ You can also have multiple hosts which it will try to use in sequence:
     $ cat ~/.btw.conf
     {
       "debug": false,
-      "host": [ "logstash-server-01.mycompany.com", "logstash-server-02.mycompany.com "],
+      "host": [ "logstash-server-01.mycompany.com", "logstash-server-02.mycompany.com"],
       "port": 5600,
       "user": "a_sysadmin_user"
     }
