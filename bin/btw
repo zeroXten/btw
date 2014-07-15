@@ -15,8 +15,12 @@ config = {
 
 config_file = File.expand_path('~/.btw.conf')
 if File.exist?(config_file)
-  config.merge!(MultiJson.load(File.read(config_file), :symbolize_names => true))
+  config.merge!(MultiJson.load(File.read(config_file), :symbolize_keys => true))
 end
+if config[:host].kind_of?(String)
+  config[:host] = [ config[:host] ]
+end
+pp config if config[:debug]
 
 # The basics
 input = ARGV.join(" ")
@@ -68,11 +72,26 @@ answer = STDIN.gets.chomp
 
 case answer.downcase
 when 'yes','y', ''
-  sock = TCPSocket.new(config[:host], config[:port])
-  if sock.send(MultiJson.dump(output), 0)
-    puts 'Sent'
+
+  sent = false
+  errors = {}
+  config[:host].each do |host|
+    begin
+      puts "Sending to #{host}:#{config[:port]}" if config[:debug]
+      sock = TCPSocket.new(host, config[:port])
+      sock.send(MultiJson.dump(output), 0)
+      sent = true
+      break
+    rescue => error
+      errors[host] = error
+    end
+  end
+
+  if sent
+    puts "Sent"
   else
-    puts 'Could not send'
+    puts "Could not send:"
+    pp errors
   end
 else
   puts 'Not sent'
