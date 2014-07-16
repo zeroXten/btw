@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'btw'
-  s.version     = '0.2.1'
-  s.date        = '2014-07-15'
+  s.version     = '0.3.0'
+  s.date        = '2014-07-16'
   s.summary     = "Send change control messages to logstash (elasticsearch, kibana)"
   s.description = "A quick and lightweight tool for creating searchable change control logs. Writes to logstash using json over TCP"
   s.authors     = ["Fraser Scott"]
