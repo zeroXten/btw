@@ -51,7 +51,7 @@ The basic idea is for the tool to be as simple and quick as possible. A very bas
 
 ## Time
 
-The timestamp is Time.now by default. It uses Chronic, so you write dates and times quite natually:
+The timestamp is Time.now by default. It uses Chronic plus some additional crazy processing, so you write dates and times quite natually:
 
     $ btw tomorrow at 8pm i will apply the package updates to our servers
     Going to send the following data:
